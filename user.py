@@ -29,7 +29,7 @@ def create_all():
     phone VARCHAR,
     city VARCHAR,
     state VARCHAR,
-    active VARCHAR
+    active SMALLINT
     );
     ''')
   print("Creating tables...")

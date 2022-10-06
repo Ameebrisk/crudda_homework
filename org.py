@@ -22,7 +22,7 @@ def org_add():
 
 def add_org(name, phone, city, state, active):
   cursor.execute(f"""
-  INSERT INTO Organizations
+  INSERT INTO organizations
   (name, phone, city, state, active)
   VALUES
   (%s, %s, %s, %s, %s);""",
@@ -49,7 +49,7 @@ def get_org_by_id(org_id):
     return jsonify('No Organization Found')
 
 @app.route('/active_org', methods=['GET'])
-def get_all_active_orgs(org_id):
+def get_all_active_orgs():
   cursor.execute('SELECT * FROM organizations WHERE active=1;')
   results = cursor.fetchall()
 
@@ -68,10 +68,10 @@ def get_all_active_orgs(org_id):
     org_list.append(org)
 
     if org in org_list:
-      return jsonify(org), 200
+      return jsonify(org_list), 200
 
-  else:
-    return jsonify('No Organization Found')
+    else:
+      return jsonify('No Organization Found'), 400
 
 @app.route('/org/activate/<org_id>', methods=['POST'])
 def org_activate(org_id):
@@ -79,7 +79,7 @@ def org_activate(org_id):
 
   conn.commit()
 
-  return jsonify('User Activated'), 200 
+  return jsonify('Organization Activated'), 200 
 
 @app.route('/org/deactivate/<org_id>', methods=['POST'])
 def org_deactivate(org_id):
@@ -91,14 +91,14 @@ def org_deactivate(org_id):
 
 @app.route('/org/delete/<org_id>', methods=['DELETE'])
 def org_delete(org_id):
-  cursor.execute('DELETE FROM Organization WHERE org_id=%s', [org_id])
+  cursor.execute('DELETE FROM Organizations WHERE org_id=%s', [org_id])
 
   conn.commit()
 
   return jsonify('Organization Deleted'), 200
 
 @app.route('/org/update/<org_id>', methods =['POST', 'PUT'])
-def org_update(user_id):
+def org_update(org_id):
    update_fields = []
    update_values = []
    field_names = ['name','phone', 'city', 'state', 'active']
@@ -112,10 +112,11 @@ def org_update(user_id):
          update_values.append(field_value)
 
    if update_fields:
-      update_values.append(org_update)
-      query_string = f"UPDATE Organization SET" + ' ,'.join (update_fields) + "WHERE org_id=%s"  
+      update_values.append(org_id)
+      query_string = f"UPDATE Organizations SET " + ', '.join (update_fields) + "WHERE org_id=%s"  
       cursor.execute(query_string, update_values)
       conn.commit()
+      return jsonify('Organization Values Updated'), 200
    else:
       return jsonify('No values sent in body'), 418
 
